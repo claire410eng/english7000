@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unit 9 英文互動測驗</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#222;
+      --muted:#666;
+      --primary:#2f6fed;
+      --ok:#157347;
+      --bad:#b02a37;
+      --border:#dfe3eb;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.6;
+    }
+    .wrap{
+      width:min(920px,92%);
+      margin:24px auto 60px;
+    }
+    .hero,.card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 6px 20px rgba(0,0,0,.05);
+    }
+    .hero{
+      padding:28px;
+      margin-bottom:18px;
+      text-align:center;
+    }
+    h1{margin:0 0 8px;font-size:clamp(26px,5vw,38px)}
+    h2{margin-top:0}
+    .muted{color:var(--muted)}
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:center;
+      margin-top:18px;
+    }
+    button{
+      border:0;
+      border-radius:10px;
+      padding:12px 18px;
+      font-size:16px;
+      cursor:pointer;
+      font-weight:700;
+    }
+    .primary{background:var(--primary);color:#fff}
+    .secondary{background:#e9eefc;color:#1f4fae}
+    .danger{background:#f8d7da;color:#842029}
+    .card{
+      padding:22px;
+      margin:16px 0;
+    }
+    .question{
+      padding:18px 0;
+      border-bottom:1px solid var(--border);
+    }
+    .question:last-child{border-bottom:0}
+    .qtitle{
+      font-weight:800;
+      margin-bottom:10px;
+    }
+    label.option{
+      display:block;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px 12px;
+      margin:8px 0;
+      cursor:pointer;
+      background:#fff;
+    }
+    label.option:hover{background:#f7f9ff}
+    input[type="radio"]{margin-right:8px}
+    .result{
+      display:none;
+      margin-top:12px;
+      padding:12px;
+      border-radius:10px;
+      font-size:15px;
+    }
+    .correct{
+      display:block;
+      background:#d1e7dd;
+      color:#0f5132;
+    }
+    .wrong{
+      display:block;
+      background:#f8d7da;
+      color:#842029;
+    }
+    #scoreBox{
+      display:none;
+      font-size:22px;
+      font-weight:800;
+      text-align:center;
+      padding:18px;
+      margin-top:16px;
+      border-radius:12px;
+      background:#fff3cd;
+      color:#664d03;
+    }
+    .hidden{display:none}
+    .section-title{
+      background:#eef3ff;
+      padding:12px 14px;
+      border-radius:10px;
+      font-weight:800;
+      margin-bottom:6px;
+    }
+    @media (max-width:600px){
+      .hero,.card{padding:16px;border-radius:12px}
+      button{width:100%}
+      .toolbar{display:grid;grid-template-columns:1fr}
+      .question{padding:14px 0}
+    }
+    @media print{
+      .toolbar,#scoreBox{display:none!important}
+      body{background:#fff}
+      .hero,.card{box-shadow:none}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Unit 9 英文互動測驗</h1>
+      <p class="muted">共20題｜基礎單字、情境理解、克漏字</p>
+      <div class="toolbar">
+        <button class="primary" onclick="startQuiz()">開始測驗</button>
+        <button class="secondary" onclick="gradeQuiz()">立即計分</button>
+        <button class="secondary" onclick="showAllExplanations()">顯示解析</button>
+        <button class="danger" onclick="resetQuiz()">重新作答</button>
+      </div>
+      <div id="scoreBox"></div>
+    </section>
+
+    <form id="quizForm" class="hidden">
+      <section class="card">
+        <div class="section-title">第一部分：基礎單字選擇題</div>
+        <div id="part1"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">第二部分：情境理解題</div>
+        <div id="part2"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">第三部分：克漏字</div>
+        <p><strong>A Day by the River</strong></p>
+        <p>
+          Kevin and his sister went to the river on Sunday. They saw a small
+          <strong>(16)</strong> on the water and wanted to take some pictures.
+          Before lunch, they ate a <strong>(17)</strong> of hot soup because the weather was cold.
+          Kevin wanted to read, so he took a <strong>(18)</strong> from his backpack.
+          His sister forgot hers and had to <strong>(19)</strong> one from him.
+          At the end of the day, they were tired, but <strong>(20)</strong> of them had a wonderful time.
+        </p>
+        <div id="part3"></div>
+      </section>
+    </form>
+  </main>
+
+<script>
+const questions = [
+  {
+    n:1, part:1,
+    q:"The teacher asked us to write today's homework on the ______.",
+    options:["blank","blackboard","board","bookcase"],
+    ans:1,
+    exp:"答案：B blackboard。中文：老師要我們把今天的作業寫在黑板上。blank 是空白；board 是木板；bookcase 是書櫃。文法：write ... on the blackboard。"
+  },
+  {
+    n:2, part:1,
+    q:"Emily couldn't finish the worksheet because she left many ______.",
+    options:["blocks","bowls","blanks","bones"],
+    ans:2,
+    exp:"答案：C blanks。中文：Emily 因為留下許多空格沒填，所以無法完成學習單。blocks 是街區或阻擋物；bowls 是碗；bones 是骨頭。文法：many 後接複數名詞。"
+  },
+  {
+    n:3, part:1,
+    q:"Kevin wore a ______ T-shirt to the party because it is his favorite color.",
+    options:["blackboard","blue","blind","blank"],
+    ans:1,
+    exp:"答案：B blue。中文：Kevin 穿了一件藍色T恤參加派對，因為藍色是他最喜歡的顏色。blackboard 是名詞；blind 是眼盲的；blank 是空白的。文法：形容詞放在名詞前修飾 T-shirt。"
+  },
+  {
+    n:4, part:1,
+    q:"The old man became ______ after the accident and could no longer see.",
+    options:["black","blind","bored","boring"],
+    ans:1,
+    exp:"答案：B blind。中文：這位老人事故後失明，無法再看見。black 是黑色的；bored 是感到無聊；boring 是令人無聊。文法：become + 形容詞。"
+  },
+  {
+    n:5, part:1,
+    q:"There was ______ on his hand after he cut himself while cooking.",
+    options:["blood","bowl","body","board"],
+    ans:0,
+    exp:"答案：A blood。中文：他做飯時割傷自己後，手上有血。bowl 是碗；body 是身體；board 是木板。文法：blood 通常作不可數名詞。"
+  },
+  {
+    n:6, part:1,
+    q:"Please don't ______ the road. Cars need to pass.",
+    options:["borrow","block","boil","blow"],
+    ans:1,
+    exp:"答案：B block。中文：請不要擋住道路，車子需要通過。borrow 是借入；boil 是煮沸；blow 是吹。文法：don't + 原形動詞。"
+  },
+  {
+    n:7, part:1,
+    q:"Dad put the soup into a large ______ before dinner.",
+    options:["block","bowl","boat","bomb"],
+    ans:1,
+    exp:"答案：B bowl。中文：爸爸晚餐前把湯裝進一個大碗裡。block 是街區或阻擋；boat 是船；bomb 是炸彈。文法：a large + 單數名詞。"
+  },
+  {
+    n:8, part:1,
+    q:"I forgot my dictionary. May I ______ yours?",
+    options:["book","blow","borrow","boil"],
+    ans:2,
+    exp:"答案：C borrow。中文：我忘了帶字典，可以借你的嗎？book 是預訂；blow 是吹；boil 是煮沸。文法：May I + 原形動詞。"
+  },
+  {
+    n:9, part:1,
+    q:"The movie was so ______ that everyone fell asleep.",
+    options:["bored","boring","blind","born"],
+    ans:1,
+    exp:"答案：B boring。中文：這部電影太無聊了，所以每個人都睡著了。bored 形容人的感受；boring 形容事物令人無聊。文法：so + 形容詞 + that 子句。"
+  },
+  {
+    n:10, part:1,
+    q:"My sister and I are ______ in the school basketball team.",
+    options:["both","bottom","blood","block"],
+    ans:0,
+    exp:"答案：A both。中文：我和妹妹兩個人都在學校籃球隊。bottom 是底部；blood 是血；block 是街區或阻擋。文法：both 用於兩者。"
+  },
+  {
+    n:11, part:2,
+    q:"Tina is moving into a new apartment. The walls have nothing on them yet. Which sentence is the BEST?",
+    options:["The walls are blind.","The walls are blank.","The walls are blackboard.","The walls are bloody."],
+    ans:1,
+    exp:"答案：B。中文：牆上目前什麼都沒有，因此牆是空白的。blind 用於眼盲；blackboard 是名詞，不能直接這樣作表語；bloody 是流血的。"
+  },
+  {
+    n:12, part:2,
+    q:'Jason forgot to reserve seats. His friend says, "You should ______ a table before Saturday."',
+    options:["borrow","block","book","blow"],
+    ans:2,
+    exp:"答案：C book。中文：你應該在星期六前預訂桌位。borrow 是借入；block 是阻擋；blow 是吹。文法：should + 原形動詞。"
+  },
+  {
+    n:13, part:2,
+    q:"Amy listened to a two-hour speech. She couldn't stop looking at the clock. How did she probably feel?",
+    options:["blind","bored","born","blue"],
+    ans:1,
+    exp:"答案：B bored。中文：Amy 聽了兩小時演講，一直看時鐘，她很可能感到無聊。bored 用來形容人的感受。"
+  },
+  {
+    n:14, part:2,
+    q:"Kevin hurt his leg badly while playing soccer. Which sentence is the BEST?",
+    options:["He broke a bone.","He boiled a bone.","He borrowed a bone.","He booked a bone."],
+    ans:0,
+    exp:"答案：A。中文：他斷了一根骨頭。boil 是煮沸；borrow 是借入；book 是預訂，皆不符合情境。"
+  },
+  {
+    n:15, part:2,
+    q:"Grandma is making tea. What should she do first?",
+    options:["Blow the water.","Boil the water.","Borrow the water.","Block the water."],
+    ans:1,
+    exp:"答案：B。中文：奶奶泡茶前應先把水煮沸。blow 是吹；borrow 是借；block 是阻擋。"
+  },
+  {
+    n:16, part:3,
+    q:"They saw a small ______ on the water.",
+    options:["bomb","boat","bone","board"],
+    ans:1,
+    exp:"答案：B boat。中文：他們看見水上有一艘小船。on the water 與 boat 最符合。"
+  },
+  {
+    n:17, part:3,
+    q:"They ate a ______ of hot soup.",
+    options:["block","bowl","blood","bottom"],
+    ans:1,
+    exp:"答案：B bowl。中文：他們喝了一碗熱湯。固定搭配：a bowl of soup。"
+  },
+  {
+    n:18, part:3,
+    q:"Kevin took a ______ from his backpack because he wanted to read.",
+    options:["book","blackboard","bomb","block"],
+    ans:0,
+    exp:"答案：A book。中文：Kevin 想閱讀，所以從背包拿出一本書。其他選項不符合閱讀情境。"
+  },
+  {
+    n:19, part:3,
+    q:"His sister forgot hers and had to ______ one from him.",
+    options:["book","borrow","boil","blow"],
+    ans:1,
+    exp:"答案：B borrow。中文：妹妹忘了帶自己的書，只好向他借一本。borrow ... from ... 表示向……借……。"
+  },
+  {
+    n:20, part:3,
+    q:"They were tired, but ______ of them had a wonderful time.",
+    options:["both","blind","boring","bloody"],
+    ans:0,
+    exp:"答案：A both。中文：他們雖然累，但兩個人都玩得很愉快。both of them 表示他們兩個都。"
+  }
+];
+
+function renderPart(part, id){
+  const box = document.getElementById(id);
+  box.innerHTML = questions.filter(q=>q.part===part).map(q=>`
+    <div class="question" id="q${q.n}">
+      <div class="qtitle">${q.n}. ${q.q}</div>
+      ${q.options.map((op,i)=>`
+        <label class="option">
+          <input type="radio" name="q${q.n}" value="${i}">
+          ${String.fromCharCode(65+i)}. ${op}
+        </label>
+      `).join("")}
+      <div class="result" id="r${q.n}"></div>
+    </div>
+  `).join("");
+}
+
+renderPart(1,"part1");
+renderPart(2,"part2");
+renderPart(3,"part3");
+
+function startQuiz(){
+  document.getElementById("quizForm").classList.remove("hidden");
+  document.getElementById("scoreBox").style.display="none";
+  window.scrollTo({top:document.getElementById("quizForm").offsetTop-10,behavior:"smooth"});
+}
+
+function gradeQuiz(){
+  document.getElementById("quizForm").classList.remove("hidden");
+  let score=0, answered=0;
+  questions.forEach(q=>{
+    const picked=document.querySelector(`input[name="q${q.n}"]:checked`);
+    const result=document.getElementById(`r${q.n}`);
+    if(picked){
+      answered++;
+      if(Number(picked.value)===q.ans){
+        score++;
+        result.className="result correct";
+        result.innerHTML=`✓ 正確<br>${q.exp}`;
+      }else{
+        result.className="result wrong";
+        result.innerHTML=`✗ 錯誤<br>${q.exp}`;
+      }
+    }else{
+      result.className="result wrong";
+      result.innerHTML=`尚未作答。<br>${q.exp}`;
+    }
+  });
+  const box=document.getElementById("scoreBox");
+  box.style.display="block";
+  box.textContent=`得分：${score} / ${questions.length}（已作答 ${answered} 題）`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function showAllExplanations(){
+  document.getElementById("quizForm").classList.remove("hidden");
+  questions.forEach(q=>{
+    const result=document.getElementById(`r${q.n}`);
+    result.className="result correct";
+    result.innerHTML=q.exp;
+  });
+}
+
+function resetQuiz(){
+  document.getElementById("quizForm").reset();
+  questions.forEach(q=>{
+    const result=document.getElementById(`r${q.n}`);
+    result.className="result";
+    result.innerHTML="";
+  });
+  document.getElementById("scoreBox").style.display="none";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+</body>
+</html>
