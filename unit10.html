@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unit 10 英文互動測驗</title>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;background:#f6f7fb;color:#222;line-height:1.6}
+.wrap{width:min(920px,92%);margin:24px auto 60px}.hero,.card{background:#fff;border:1px solid #dfe3eb;border-radius:16px;box-shadow:0 6px 20px #0000000d}
+.hero{padding:26px;text-align:center;margin-bottom:18px}.card{padding:22px;margin:16px 0}h1{margin:0 0 8px;font-size:clamp(28px,6vw,40px)}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}button{border:0;border-radius:10px;padding:12px 18px;font-size:16px;font-weight:700}
+.primary{background:#2f6fed;color:#fff}.secondary{background:#e9eefc;color:#1f4fae}.danger{background:#f8d7da;color:#842029}
+.progress-shell{height:12px;background:#e8ebf1;border-radius:999px;overflow:hidden;margin-top:18px}.progress-bar{height:100%;width:0;background:#2f6fed}
+.section-title{background:#eef3ff;padding:12px 14px;border-radius:10px;font-weight:800}.question{padding:18px 0;border-bottom:1px solid #dfe3eb}.qtitle{font-weight:800;margin-bottom:10px}
+.option{display:block;border:1px solid #dfe3eb;border-radius:10px;padding:10px 12px;margin:8px 0}.result{display:none;margin-top:12px;padding:12px;border-radius:10px}
+.correct{display:block;background:#d1e7dd;color:#0f5132}.wrong{display:block;background:#f8d7da;color:#842029}.hidden{display:none}
+#scoreBox{display:none;margin-top:16px;padding:16px;border-radius:12px;background:#fff3cd;color:#664d03;font-size:22px;font-weight:800}
+@media(max-width:600px){.hero,.card{padding:16px}.toolbar{display:grid}.toolbar button{width:100%}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="hero">
+<h1>Unit 10 英文互動測驗</h1>
+<p>共20題｜基礎單字、情境理解、閱讀克漏字</p>
+<div class="toolbar">
+<button class="primary" onclick="startQuiz()">開始測驗</button>
+<button class="secondary" onclick="gradeQuiz()">立即計分</button>
+<button class="secondary" onclick="showAll()">顯示解析</button>
+<button class="danger" onclick="resetQuiz()">重新作答</button>
+</div>
+<div class="progress-shell"><div id="bar" class="progress-bar"></div></div>
+<div id="progressText">已完成 0 / 20 題</div>
+<div id="scoreBox"></div>
+</section>
+<form id="quiz" class="hidden">
+<section class="card"><div class="section-title">第一部分：基礎單字選擇題</div><div id="p1"></div></section>
+<section class="card"><div class="section-title">第二部分：情境理解題</div><div id="p2"></div></section>
+<section class="card">
+<div class="section-title">第三部分：閱讀克漏字</div>
+<p><b>A Busy Saturday</b></p>
+<p>Tom had a very busy Saturday. In the morning, he ate <b>(16)</b> with his family. Then he took the <b>(17)</b> to the bookstore because he wanted to <b>(18)</b> some books for his project. On his way home, he saw a beautiful <b>(19)</b> over the river. At night, he helped his father <b>(20)</b> a small table for his bedroom.</p>
+<div id="p3"></div>
+</section>
+</form>
+</main>
+<script>
+const qs=[
+[1,1,"My mother put all the toys into a big ______ before moving.",["bridge","box","bus","bowl"],1,"答案：B box。媽媽搬家前把所有玩具放進一個大箱子。bridge 是橋；bus 是公車；bowl 是碗。"],
+[2,1,"Peter is very ______. He saved a child from the fire.",["bright","brave","busy","brown"],1,"答案：B brave。Peter 很勇敢。bright 是明亮的；busy 是忙碌的；brown 是棕色的。"],
+[3,1,"Please buy two loaves of ______ at the bakery.",["bread","butter","breakfast","bug"],0,"答案：A bread。two loaves of bread 表示兩條麵包。"],
+[4,1,"My little brother accidentally ______ my toy yesterday.",["bought","broke","built","brought"],1,"答案：B broke。yesterday 表示過去時間，所以用 break 的過去式 broke。"],
+[5,1,"We usually eat ______ before going to school.",["bridge","breakfast","bread","building"],1,"答案：B breakfast。eat breakfast 表示吃早餐。"],
+[6,1,"The sun is so ______ today that I need sunglasses.",["brown","bright","brave","busy"],1,"答案：B bright。今天陽光很耀眼。文法：so + 形容詞 + that 子句。"],
+[7,1,"Don't forget to ______ your homework tomorrow.",["build","break","bring","butter"],2,"答案：C bring。不要忘記把作業帶來。forget to + 原形動詞。"],
+[8,1,"Jack has one older ______ and one younger sister.",["businessman","brother","boyfriend","boy"],1,"答案：B brother。older brother 表示哥哥。"],
+[9,1,"My father goes to work by ______ every morning.",["bridge","bus","building","bug"],1,"答案：B bus。by bus 表示搭公車。"],
+[10,1,"Please don't ______ me while I'm studying.",["bug","buy","break","build"],0,"答案：A bug。bug 在此作動詞，表示打擾。"],
+[11,2,"Amy wants to visit her grandma. She needs to cross the river. What should she use?",["a bus","a bridge","a box","a cage"],1,"答案：B a bridge。要過河應使用橋。"],
+[12,2,"David forgot his lunch. His mother says, “I'll ______ it to school.”",["break","bring","buy","build"],1,"答案：B bring。媽媽會把午餐帶到學校。"],
+[13,2,"Eric works from morning until night. He hardly has time to rest. Eric is very ______.",["brave","busy","bright","brown"],1,"答案：B busy。他從早忙到晚，幾乎沒有時間休息。"],
+[14,2,"A little bird cannot fly away because it is inside a ______.",["box","cage","bridge","building"],1,"答案：B cage。小鳥在籠子裡。"],
+[15,2,"Jenny wants a new notebook. She goes to the bookstore to ______ one.",["bring","build","buy","break"],2,"答案：C buy。她去書店買一本筆記本。"],
+[16,3,"In the morning, he ate ______ with his family.",["breakfast","bread","butter","bug"],0,"答案：A breakfast。早上和家人一起吃早餐。"],
+[17,3,"Then he took the ______ to the bookstore.",["bridge","bus","box","brother"],1,"答案：B bus。take the bus 表示搭公車。"],
+[18,3,"He wanted to ______ some books for his project.",["bring","buy","build","break"],1,"答案：B buy。在書店買書，語意唯一明確。"],
+[19,3,"He saw a beautiful ______ over the river.",["bridge","building","businessman","butterfly"],0,"答案：A bridge。河上有一座美麗的橋。"],
+[20,3,"He helped his father ______ a small table.",["build","break","bug","butter"],0,"答案：A build。help + 人 + 原形動詞。"]
+];
+function render(part,id){
+document.getElementById(id).innerHTML=qs.filter(q=>q[1]===part).map(q=>`<div class="question"><div class="qtitle">${q[0]}. ${q[2]}</div>${q[3].map((o,i)=>`<label class="option"><input type="radio" name="q${q[0]}" value="${i}" onchange="progress()">${String.fromCharCode(65+i)}. ${o}</label>`).join("")}<div id="r${q[0]}" class="result"></div></div>`).join("")
+}
+render(1,"p1");render(2,"p2");render(3,"p3");
+function startQuiz(){document.getElementById("quiz").classList.remove("hidden");document.getElementById("quiz").scrollIntoView({behavior:"smooth"})}
+function progress(){let n=qs.filter(q=>document.querySelector(`input[name=q${q[0]}]:checked`)).length;document.getElementById("progressText").textContent=`已完成 ${n} / 20 題`;document.getElementById("bar").style.width=(n*5)+"%"}
+function gradeQuiz(){document.getElementById("quiz").classList.remove("hidden");let s=0,a=0;qs.forEach(q=>{let p=document.querySelector(`input[name=q${q[0]}]:checked`),r=document.getElementById("r"+q[0]);if(p){a++;if(+p.value===q[4]){s++;r.className="result correct";r.innerHTML="✓ 正確<br>"+q[5]}else{r.className="result wrong";r.innerHTML="✗ 錯誤<br>"+q[5]}}else{r.className="result wrong";r.innerHTML="尚未作答。<br>"+q[5]}});let b=document.getElementById("scoreBox");b.style.display="block";b.textContent=`得分：${s} / 20（${s*5}分）｜已作答 ${a} 題`;scrollTo({top:0,behavior:"smooth"})}
+function showAll(){document.getElementById("quiz").classList.remove("hidden");qs.forEach(q=>{let r=document.getElementById("r"+q[0]);r.className="result correct";r.innerHTML=q[5]})}
+function resetQuiz(){document.getElementById("quiz").reset();qs.forEach(q=>{let r=document.getElementById("r"+q[0]);r.className="result";r.innerHTML=""});document.getElementById("scoreBox").style.display="none";progress();scrollTo({top:0,behavior:"smooth"})}
+</script>
+</body>
+</html>
